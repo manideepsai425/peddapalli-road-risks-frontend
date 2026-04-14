@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import Sidebar       from './components/Sidebar'
-import MapView       from './components/MapView'
-import MapControls   from './components/MapControls'
-import RoutePlanner  from './components/RoutePlanner'
-import HotspotsPanel from './components/HotspotsPanel'
+import Sidebar        from './components/Sidebar'
+import MapView        from './components/MapView'
+import MapControls    from './components/MapControls'
+import RoutePlanner   from './components/RoutePlanner'
+import HotspotsPanel  from './components/HotspotsPanel'
 import AnalyticsPanel from './components/AnalyticsPanel'
-import AboutPanel    from './components/AboutPanel'
+import AboutPanel     from './components/AboutPanel'
 import { fetchHealth } from './hooks/useApi'
 import type { TabId, RouteResponse, HotspotPoint } from './types'
 
@@ -18,7 +18,6 @@ export default function App() {
   const [showHeatmap,   setShowHeatmap]   = useState(true)
   const [showHotspots,  setShowHotspots]  = useState(true)
 
-  // Check API health on mount
   useEffect(() => {
     fetchHealth()
       .then(() => setApiStatus('ok'))
@@ -40,13 +39,7 @@ export default function App() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-night-950">
-
-      {/* ── Sidebar ── */}
-      <Sidebar
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        apiStatus={apiStatus}
-      >
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} apiStatus={apiStatus}>
         {activeTab === 'planner' && (
           <RoutePlanner
             onRouteResult={handleRouteResult}
@@ -68,9 +61,7 @@ export default function App() {
         {activeTab === 'about'     && <AboutPanel />}
       </Sidebar>
 
-      {/* ── Map ── */}
       <main className="flex-1 relative overflow-hidden">
-        {/* Map fill */}
         <div className="absolute inset-0">
           <MapView
             safestRoute={routeResult?.safest_route ?? null}
@@ -85,7 +76,6 @@ export default function App() {
           />
         </div>
 
-        {/* Floating controls */}
         <MapControls
           showHeatmap={showHeatmap}
           onToggleHeatmap={() => setShowHeatmap(v => !v)}
@@ -93,40 +83,34 @@ export default function App() {
           onToggleHotspots={() => setShowHotspots(v => !v)}
         />
 
-        {/* Bottom status bar */}
         {routeResult && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000]
                           glass-card px-4 py-2 flex items-center gap-4 text-xs animate-fade-in
                           border-teal-500/20">
             <span className="text-slate-400">
-              Route: <span className="text-white font-medium">
-                {routeResult.origin_label} → {routeResult.destination_label}
+              <span className="text-white font-medium">
+                {routeResult.origin_label} â†’ {routeResult.destination_label}
               </span>
             </span>
             <span className="text-slate-600">|</span>
             <span className="text-slate-400">
-              Safest risk: <span className="text-teal-400 font-mono font-semibold">
+              Safest risk:{' '}
+              <span className="text-teal-400 font-mono font-semibold">
                 {routeResult.safest_route.overall_risk.toFixed(3)}
               </span>
             </span>
             <span className="text-slate-600">|</span>
-            <span className="text-slate-400">
-              {routeResult.safest_route.estimated_km} km
-            </span>
+            <span className="text-slate-400">{routeResult.safest_route.estimated_km} km</span>
             {routeResult.alternatives.length > 0 && (
               <>
                 <span className="text-slate-600">|</span>
                 <div className="flex gap-1.5">
-                  {[routeResult.safest_route, ...routeResult.alternatives].map(r => (
-                    <button
-                      key={r.route_id}
-                      onClick={() => setActiveRouteId(r.route_id)}
+                  {allRoutes.map(r => (
+                    <button key={r.route_id} onClick={() => setActiveRouteId(r.route_id)}
                       className={`px-2 py-0.5 rounded text-xs font-medium transition-all
                         ${r.route_id === activeRouteId
                           ? 'bg-teal-500/30 text-teal-300 border border-teal-500/40'
-                          : 'text-slate-500 hover:text-slate-300'
-                        }`}
-                    >
+                          : 'text-slate-500 hover:text-slate-300'}`}>
                       {r.label} ({r.overall_risk.toFixed(2)})
                     </button>
                   ))}
@@ -136,13 +120,12 @@ export default function App() {
           </div>
         )}
 
-        {/* Welcome overlay when no route is selected */}
         {!routeResult && (
           <div className="absolute inset-0 flex items-center justify-center
                           pointer-events-none z-[999]">
             <div className="glass-card px-8 py-6 text-center max-w-sm
                             border-teal-500/20 glow-teal animate-fade-in">
-              <div className="text-4xl mb-3">🛣️</div>
+              <div className="text-4xl mb-3">ðŸ›£ï¸</div>
               <h1 className="font-display font-bold text-xl text-white mb-2">
                 Peddapalli Road Risk AI
               </h1>
@@ -152,10 +135,10 @@ export default function App() {
                 AI-powered accident risk prediction.
               </p>
               <div className="mt-4 flex items-center justify-center gap-3 text-xs text-slate-600">
-                <span>🟢 Low risk</span>
-                <span>🟡 Medium</span>
-                <span>🟠 High</span>
-                <span>🔴 Critical</span>
+                <span>ðŸŸ¢ Low</span>
+                <span>ðŸŸ¡ Medium</span>
+                <span>ðŸŸ  High</span>
+                <span>ðŸ”´ Critical</span>
               </div>
             </div>
           </div>
